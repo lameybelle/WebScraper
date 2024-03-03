@@ -1,5 +1,6 @@
 from PyPDF2 import PdfReader
 import re
+import json
 
 class Reader:
     def __init__(self, PDFfile) -> None:
@@ -10,7 +11,8 @@ class Reader:
         self.employees = {}
     
     def pageInterator(self):
-        while self.pageNumber < self.numPages:
+        while self.pageNumber < self.numPages-1:
+            print("page number ", self.pageNumber)
             text = self.pagePull() 
             self.decipher(text) #decipher and place items in dict
             self.pageNumber += 1
@@ -34,15 +36,14 @@ class Reader:
         #throw out last 2 lines
         del lines[-2:]
 
-        #print(lines)
-
         #each employee takes 6 lines, 7 per page
         i = 0
         quantity = 6
         numEmployees = int(len(lines)/quantity)
+        lineBuff = 0
         while i < numEmployees:
             #1 - Name: last, first middle
-            names = lines[(i*quantity)] #pull name
+            names = lines[(i*quantity)+lineBuff] #pull name
             names = names.split() #split into last, first, middle
             names[0] = names[0][:-1] #remove comma
             key = names[1] + " " + names[0] #make key with first and last ex: "Amy Gregg"
@@ -52,16 +53,18 @@ class Reader:
                 tempDict = {'FIRST': names[1], 'MIDDLE': ' ', 'LAST': names[0]}
             
             #2 - HOME DEPARTMENT
-            homeDept = lines[(i*quantity)+1].split('HOME DEPARTMENT ')
+            homeDept = lines[(i*quantity)+1+lineBuff].split('HOME DEPARTMENT ')
             tempDict['HOME DEPARTMENT'] = homeDept[1]
+
             #3 - JOB TITLE
-            jobTitle = lines[(i*quantity)+2].split('JOB TITLE ')
+            jobTitle = lines[(i*quantity)+2+lineBuff].split('JOB TITLE ')
             tempDict['JOB TITLE'] = jobTitle[1]
 
-            #4 - POSITION CLASS, TERM OF SVC, DEPARTMENT, TOTAL PAY, TYPE
-            lineFour = lines[(i*quantity)+3]
+            #4 - POSITION CLASS, TERM OF SVC, PAY DEPARTMENT, TOTAL PAY, JOB TYPE
+            lineFour = lines[(i*quantity)+3+lineBuff]
+
             # Define the patterns for splitting
-            patterns = ['POSITION CLASS', 'TERM OF SVC', 'DEPARTMENT', 'TOTAL PAY', 'TYPE']
+            patterns = ['POSITION CLASS', 'TERM OF SVC', 'PAY DEPARTMENT', 'TOTAL PAY', 'JOB TYPE']
 
             # Create a regular expression pattern by joining the patterns with '|'
             split_pattern = '|'.join(map(re.escape, patterns))
@@ -76,11 +79,14 @@ class Reader:
                 y = y[:-1]
                 y = y[1:]
             
-            result = {patterns[i]: values[i] for i in range(len(patterns))}
-            tempDict.update(result)
+            if len(values) == 5:
+                result = {patterns[i]: values[i] for i in range(len(patterns))}
+                tempDict.update(result)
+            else:
+                lineBuff += 1
 
             #5 - JOB START DATE, JOB STATUS
-            lineFive = lines[(i*quantity)+4]
+            lineFive = lines[(i*quantity)+4+lineBuff]
             # Define the patterns for splitting
             patterns = ['JOB START DATE', 'JOB STATUS']
 
@@ -97,12 +103,13 @@ class Reader:
                 y = y[:-1]
                 y = y[1:]
             
-            result = {patterns[i]: values[i] for i in range(len(patterns))}
-            tempDict.update(result)
+            if len(values) == 2:
+                result = {patterns[i]: values[i] for i in range(len(patterns))}
+                tempDict.update(result)
 
             #6 - JOB END DATE (can be NULL)
-            endDate = lines[(i*quantity)+5].split('JOB END DATE ')
-            if len(endDate) != 1:
+            endDate = lines[(i*quantity)+5+lineBuff].split('JOB END DATE ')
+            if len(endDate) == 2:
                 tempDict['JOB END DATE'] = endDate[1]
             else:
                 tempDict['JOB END DATE'] = ""
@@ -120,4 +127,5 @@ class Reader:
 if __name__ == "__main__":
     CLASSIFIED = Reader("PDFS/CLASSIFIED.pdf")
     CLASSIFIED.pageInterator()
-    #print(CLASSIFIED.employees)
+    with open('classified.txt', 'w') as convert_file: 
+        convert_file.write(json.dumps(CLASSIFIED.employees))
