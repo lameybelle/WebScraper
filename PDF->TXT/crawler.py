@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import time
 import csv
 
-def crawl(query_list):
+def crawl(query_list, csvName):
     # stores employees for csv
     employees = []
     
@@ -11,7 +11,6 @@ def crawl(query_list):
     for query in query_list:
         first = query[0]
         last = query[1]
-        title = query[3]
         print("Crawling " + first + " " + last)
         response = requests.get(f"https://www.uoregon.edu/findpeople/person/subsetsearch/{first}%20{last}/200")
 
@@ -33,10 +32,8 @@ def crawl(query_list):
                         url = "https://www.uoregon.edu" + name_a['href']
                         response = requests.get(url)
                         soup = BeautifulSoup(response.content, "html.parser")
-                        # Check if the title matches
-                        if soup.find('span', class_='title'):
-                            employee = assignDict(soup)
-                            employees.append(employee)
+                        employee = assignDict(soup)
+                        employees.append(employee)
         else:
             employee["url"] = "Not Found"
             employee["Name"] = first + " " + last
@@ -45,7 +42,7 @@ def crawl(query_list):
 
         time.sleep(3)
 
-    with open("employees.csv", "a", newline='') as csv_file:
+    with open(csvName, "w", newline='') as csv_file:
         writer = csv.writer(csv_file)
 
         # Write header
