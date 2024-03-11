@@ -1,6 +1,5 @@
 from PyPDF2 import PdfReader
 import re
-import json
 import csv
 import crawler
 
@@ -15,6 +14,7 @@ class ClassifiedReader:
     
     def pageInterator(self):
         while self.pageNumber < self.numPages-1:
+            print(self.pageNumber)
             text = self.pagePull() 
             self.decipher(text) #decipher and place items in dict
             self.pageNumber += 1
@@ -203,6 +203,7 @@ class UnclassifiedReader:
     
     def pageInterator(self):
         while self.pageNumber < self.numPages-1:
+            print(self.pageNumber)
             text = self.pagePull() 
             self.decipher(text) #decipher and place items in dict
             self.pageNumber += 1
