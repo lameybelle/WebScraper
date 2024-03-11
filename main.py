@@ -8,7 +8,7 @@ class ClassifiedReader:
     def __init__(self, PDFfile) -> None:
         self.PDFfile = PDFfile #file location PDFS/CLASSIFIED.pdf 
         self.reader = PdfReader(self.PDFfile) #stream for pyPDF
-        self.pageNumber = 106 #current page number count
+        self.pageNumber = 1 #current page number count
         self.numPages = len(self.reader.pages) #total number of pages
         self.employees = {}
         self.activeEmployees = []
@@ -16,7 +16,6 @@ class ClassifiedReader:
     def pageInterator(self):
         while self.pageNumber < self.numPages-1:
             text = self.pagePull() 
-            print(self.pageNumber)
             self.decipher(text) #decipher and place items in dict
             self.pageNumber += 1
         
@@ -205,7 +204,6 @@ class UnclassifiedReader:
     def pageInterator(self):
         while self.pageNumber < self.numPages-1:
             text = self.pagePull() 
-            print(self.pageNumber)
             self.decipher(text) #decipher and place items in dict
             self.pageNumber += 1
         
@@ -408,46 +406,49 @@ class UnclassifiedReader:
         self.employees[employeeName] = employeeInfo
 
 if __name__ == "__main__":
-    CLASSIFIED = ClassifiedReader("PDFS/CLASSIFIED.pdf")
-    CLASSIFIED.pageInterator()
+    #CLASSIFIED = ClassifiedReader("PDFS/CLASSIFIED.pdf")
+    #CLASSIFIED.pageInterator()
+    #print("done with classified")
     UNCLASSIFIED = UnclassifiedReader("PDFS/UNCLASSIFIED.pdf")
     UNCLASSIFIED.pageInterator()
-
+    print("done with unclassified")
+    
     # Writing unclassified employee information to CSV file
-with open("unclassifiedEmployees.csv", 'w', newline='') as csv_file:
-    writer = csv.writer(csv_file)
+    with open("unclassifiedEmployees.csv", 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
 
-    # Write header row
-    header = ['FIRST', 'MIDDLE', 'LAST', 'HOME DEPARTMENT', 'ACADEMIC TITLE',
-              'TERM OF SVC', 'PAY DEPARTMENT', 'TOTAL PAY', 'JOB TYPE',
-              'JOB START DATE', 'JOB STATUS', 'JOB END DATE', 'OA SALARY GRADE', 'POSITION CLASS']
-    writer.writerow(header)
+        # Write header row
+        header = ['FIRST', 'MIDDLE', 'LAST', 'HOME DEPARTMENT', 'ACADEMIC TITLE',
+                'TERM OF SVC', 'PAY DEPARTMENT', 'TOTAL PAY', 'JOB TYPE',
+                'JOB START DATE', 'JOB STATUS', 'JOB END DATE', 'OA SALARY GRADE', 'POSITION CLASS']
+        writer.writerow(header)
 
-    # Write each unclassified employee's information as a row in the CSV file
-    for employee_info in UNCLASSIFIED.employees.values():
-        writer.writerow([
-            employee_info.get('FIRST', ''),
-            employee_info.get('MIDDLE', ''),
-            employee_info.get('LAST', ''),
-            employee_info.get('HOME DEPARTMENT', ''),
-            employee_info.get('ACADEMIC TITLE', ''),
-            employee_info.get('TERM OF SVC', ''),
-            employee_info.get('PAY DEPARTMENT', ''),
-            employee_info.get('TOTAL PAY', ''),
-            employee_info.get('JOB TYPE', ''),
-            employee_info.get('JOB START DATE', ''),
-            employee_info.get('JOB STATUS', ''),
-            employee_info.get('JOB END DATE', ''),
-            employee_info.get('OA SALARY GRADE', ''),
-            employee_info.get('POSITION CLASS', '')
-        ])
+        # Write each unclassified employee's information as a row in the CSV file
+        for employee_info in UNCLASSIFIED.employees.values():
+            writer.writerow([
+                employee_info.get('FIRST', ''),
+                employee_info.get('MIDDLE', ''),
+                employee_info.get('LAST', ''),
+                employee_info.get('HOME DEPARTMENT', ''),
+                employee_info.get('ACADEMIC TITLE', ''),
+                employee_info.get('TERM OF SVC', ''),
+                employee_info.get('PAY DEPARTMENT', ''),
+                employee_info.get('TOTAL PAY', ''),
+                employee_info.get('JOB TYPE', ''),
+                employee_info.get('JOB START DATE', ''),
+                employee_info.get('JOB STATUS', ''),
+                employee_info.get('JOB END DATE', ''),
+                employee_info.get('OA SALARY GRADE', ''),
+                employee_info.get('POSITION CLASS', '')
+            ])
 
 
     print(len(UNCLASSIFIED.activeEmployees))
 
     # Extracting employee information
-    employees_data = CLASSIFIED.employees.values()
+    #employees_data = CLASSIFIED.employees.values()
     
+    ''' 
     # Writing employee information to CSV file
     with open("classifiedEmployees.csv", 'w', newline='') as csv_file:
         writer = csv.writer(csv_file)
@@ -474,7 +475,9 @@ with open("unclassifiedEmployees.csv", 'w', newline='') as csv_file:
                 employee_info.get('JOB START DATE', ''),
                 employee_info.get('JOB STATUS', ''),
                 employee_info.get('JOB END DATE', '')
-            ])
+            ])'''
     print("crawlingggg")
-    crawler.crawl(CLASSIFIED.activeEmployees[:2], "classifiedFindPeople.csv")
-    crawler.crawl(UNCLASSIFIED.activeEmployees[:2], "unclassifiedFindPeople.csv")
+
+    #start back up on 1726
+    #crawler.crawl(CLASSIFIED.activeEmployees[1726:], "classifiedFindPeople.csv")
+    crawler.crawl(UNCLASSIFIED.activeEmployees[351:], "unclassifiedFindPeople.csv")
